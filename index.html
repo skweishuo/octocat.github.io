@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>高校你画我猜词库</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4a90e2;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .progress {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .category {
+            background: #4a90e2;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .word {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            word-break: break-all;
+        }
+
+        .difficulty {
+            margin-bottom: 20px;
+        }
+
+        .star {
+            color: #ddd;
+            font-size: 1.5rem;
+            margin: 0 2px;
+        }
+
+        .star.filled {
+            color: #ffd700;
+        }
+
+        .reference {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 15px;
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 20px;
+        }
+
+        .reference strong {
+            color: #4a90e2;
+        }
+
+        .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            background: white;
+            padding: 15px 0;
+            border-top: 1px solid #eee;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .nav-btn {
+            min-width: 44px;
+            min-height: 44px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: #4a90e2;
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            touch-action: manipulation;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+            background: #357abd;
+        }
+
+        .favorite-btn {
+            background: #ff6b6b;
+        }
+
+        .favorite-btn.active {
+            background: #ff4757;
+        }
+
+        .landscape-hint {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 50px;
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .landscape-hint p {
+            margin-bottom: 20px;
+        }
+
+        @media (orientation: landscape) and (max-height: 500px) {
+            .landscape-hint {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                border-radius: 15px;
+                padding: 15px;
+            }
+            .card {
+                padding: 20px;
+            }
+            .word {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landscape-hint">
+        <p>请将手机竖屏使用以获得最佳体验</p>
+        <div>📱</div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>高校你画我猜</h1>
+            <div class="progress">第 <span id="current-num">1</span> 题 / 共 <span id="total-num">100</span> 题</div>
+        </div>
+
+        <div class="card" id="card">
+            <div class="category" id="category">动物</div>
+            <div class="word" id="word">猫咪</div>
+            <div class="difficulty" id="difficulty">
+                <span class="star filled">★</span>
+                <span class="star filled">★</span>
+                <span class="star">☆</span>
+                <span class="star">☆</span>
+                <span class="star">☆</span>
+            </div>
+            <div class="reference" id="reference">
+                <strong>参考内容：</strong>校园里常见的可爱动物，经常出现在宿舍楼下讨食。
+            </div>
+        </div>
+
+        <div class="nav-bar">
+            <button class="nav-btn" id="prev-btn" style="background: #6c757d;">上一题</button>
+            <button class="nav-btn favorite-btn" id="favorite-btn">❤ 收藏</button>
+            <button class="nav-btn" id="next-btn">下一题</button>
+            <button class="nav-btn" id="random-btn" style="background: #28a745;">🎲 随机</button>
+        </div>
+    </div>
+
+    <script>
+        // 词库数据
+        const wordLibrary = {
+            "动物": [
+                { word: "猫咪", difficulty: 1, reference: "校园里常见的可爱动物，经常出现在宿舍楼下讨食。" },
+                { word: "狗狗", difficulty: 1, reference: "人类最好的朋友，有些同学会在宿舍养。" },
+                { word: "松鼠", difficulty: 2, reference: "在校园树林里跳跃的小动物，喜欢收集坚果。" },
+                { word: "仓鼠", difficulty: 2, reference: "小型宠物，圆滚滚的很可爱，适合宿舍饲养。" },
+                { word: "鹦鹉", difficulty: 3, reference: "会学人说话的鸟类，有些同学会在宿舍养。" },
+                { word: "刺猬", difficulty: 3, reference: "身上有刺的小动物，近年来成为网红宠物。" },
+                { word: "蜥蜴", difficulty: 4, reference: "爬行动物，有些同学会养变色龙等品种。" },
+                { word: "蜜袋鼯", difficulty: 5, reference: "会滑翔的小动物，需要专业饲养知识。" }
+            ],
+            "美食": [
+                { word: "食堂", difficulty: 1, reference: "学生们日常用餐的地方，有不同的窗口。" },
+                { word: "火锅", difficulty: 1, reference: "聚餐必备，冬天最受欢迎的美食。" },
+                { word: "奶茶", difficulty: 1, reference: "学生们最爱的饮品，各种口味应有尽有。" },
+                { word: "烧烤", difficulty: 2, reference: "夜宵首选，宿舍楼下经常能闻到香味。" },
+                { word: "麻辣烫", difficulty: 2, reference: "自选食材的麻辣美食，价格实惠。" },
+                { word: "煎饼果子", difficulty: 2, reference: "早餐热门选择，现做现卖。" },
+                { word: "螺蛳粉", difficulty: 3, reference: "有特殊气味的广西特色美食，爱憎分明。" },
+                { word: "日料", difficulty: 4, reference: "精致的日本料理，价格相对较高。" },
+                { word: "法餐", difficulty: 5, reference: "高端西餐，浪漫约会的选择。" }
+            ],
+            "交通": [
+                { word: "地铁", difficulty: 1, reference: "城市主要交通工具，学生通勤常用。" },
+                { word: "公交", difficulty: 1, reference: "覆盖面广的公共交通工具。" },
+                { word: "自行车", difficulty: 1, reference: "校园内最常见的代步工具。" },
+                { word: "共享单车", difficulty: 2, reference: "扫码即用的便利交通工具。" },
+                { word: "电动车", difficulty: 2, reference: "省力的代步工具，需要充电。" },
+                { word: "出租车", difficulty: 2, reference: "便捷但相对较贵的出行方式。" },
+                { word: "高铁", difficulty: 3, reference: "快速的城际交通工具。" },
+                { word: "飞机", difficulty: 3, reference: "长途旅行的主要方式。" },
+                { word: "轮船", difficulty: 4, reference: "水上交通工具，用于特定航线。" }
+            ],
+            "运动": [
+                { word: "篮球", difficulty: 1, reference: "最受欢迎的校园运动，男生最爱。" },
+                { word: "跑步", difficulty: 1, reference: "最简单的运动方式，操场常见。" },
+                { word: "羽毛球", difficulty: 2, reference: "室内外都可以进行的运动。" },
+                { word: "游泳", difficulty: 2, reference: "全身性运动，需要专门的场地。" },
+                { word: "瑜伽", difficulty: 2, reference: "修身养性的运动，女生较多参与。" },
+                { word: "乒乓球", difficulty: 2, reference: "国球，学校体育馆常设项目。" },
+                { word: "网球", difficulty: 3, reference: "需要专门场地和装备的运动。" },
+                { word: "攀岩", difficulty: 4, reference: "极限运动，需要专业指导。" },
+                { word: "马拉松", difficulty: 5, reference: "长距离跑步比赛，考验耐力。" }
+            ],
+            "科技": [
+                { word: "手机", difficulty: 1, reference: "学生必备的通讯工具，不离身。" },
+                { word: "电脑", difficulty: 1, reference: "学习和娱乐的重要工具。" },
+                { word: "WiFi", difficulty: 1, reference: "校园网络基础设施，不可或缺。" },
+                { word: "APP", difficulty: 2, reference: "手机应用程序，各种功能都有。" },
+                { word: "AI", difficulty: 3, reference: "人工智能，当前热门技术。" },
+                { word: "VR", difficulty: 4, reference: "虚拟现实技术，沉浸式体验。" },
+                { word: "区块链", difficulty: 5, reference: "分布式账本技术，金融创新。" },
+                { word: "量子计算", difficulty: 5, reference: "前沿计算技术，理论阶段。" }
+            ],
+            "文化": [
+                { word: "图书馆", difficulty: 1, reference: "学习圣地，自习的好地方。" },
+                { word: "博物馆", difficulty: 2, reference: "文化展示场所，增长见识。" },
+                { word: "书法", difficulty: 2, reference: "传统文化艺术，修身养性。" },
+                { word: "诗词", difficulty: 2, reference: "古典文学形式，意境深远。" },
+                { word: "戏曲", difficulty: 3, reference: "传统表演艺术，国粹之一。" },
+                { word: "民俗", difficulty: 3, reference: "民间文化传统，地域特色。" },
+                { word: "非遗", difficulty: 4, reference: "非物质文化遗产，需要保护。" },
+                { word: "考古", difficulty: 4, reference: "研究古代文化的学科。" }
+            ],
+            "娱乐": [
+                { word: "电影", difficulty: 1, reference: "休闲娱乐方式，周末常选。" },
+                { word: "KTV", difficulty: 1, reference: "唱歌娱乐场所，聚会热门。" },
+                { word: "游戏", difficulty: 1, reference: "电子娱乐，课余时间消遣。" },
+                { word: "演唱会", difficulty: 2, reference: "现场音乐表演，粉丝狂热。" },
+                { word: "游乐园", difficulty: 2, reference: "娱乐设施集中的地方。" },
+                { word: "剧本杀", difficulty: 3, reference: "新兴社交推理游戏。" },
+                { word: "密室逃脱", difficulty: 3, reference: "沉浸式解谜游戏。" },
+                { word: "脱口秀", difficulty: 4, reference: "语言类表演艺术。" }
+            ],
+            "艺术": [
+                { word: "绘画", difficulty: 1, reference: "视觉艺术，表达创意的方式。" },
+                { word: "音乐", difficulty: 1, reference: "听觉艺术，陶冶情操。" },
+                { word: "舞蹈", difficulty: 2, reference: "肢体艺术，需要练习。" },
+                { word: "雕塑", difficulty: 3, reference: "立体艺术形式，创作周期长。" },
+                { word: "摄影", difficulty: 2, reference: "记录美好瞬间的艺术。" },
+                { word: "陶艺", difficulty: 3, reference: "传统手工艺，需要技巧。" },
+                { word: "装置艺术", difficulty: 4, reference: "现代艺术形式，概念性强。" },
+                { word: "行为艺术", difficulty: 5, reference: "前卫艺术形式，表达观念。" }
+            ],
+            "职业": [
+                { word: "老师", difficulty: 1, reference: "传道授业解惑的职业。" },
+                { word: "医生", difficulty: 1, reference: "救死扶伤的白衣天使。" },
+                { word: "程序员", difficulty: 2, reference: "编写代码的技术工作者。" },
+                { word: "设计师", difficulty: 2, reference: "创造美观实用作品的职业。" },
+                { word: "记者", difficulty: 2, reference: "报道新闻的媒体工作者。" },
+                { word: "律师", difficulty: 3, reference: "法律专业人士，维护正义。" },
+                { word: "心理咨询师", difficulty: 3, reference: "帮助解决心理问题的职业。" },
+                { word: "宇航员", difficulty: 5, reference: "探索太空的特殊职业。" }
+            ],
+            "自然": [
+                { word: "阳光", difficulty: 1, reference: "万物生长的能源来源。" },
+                { word: "雨水", difficulty: 1, reference: "滋润大地的天然水源。" },
+                { word: "花朵", difficulty: 1, reference: "植物的繁殖器官，色彩缤纷。" },
+                { word: "森林", difficulty: 2, reference: "树木密集的生态系统。" },
+                { word: "海洋", difficulty: 2, reference: "广阔的水域，生命摇篮。" },
+                { word: "星空", difficulty: 2, reference: "夜空中闪烁的天体集合。" },
+                { word: "瀑布", difficulty: 3, reference: "从高处落下的壮观水流。" },
+                { word: "极光", difficulty: 4, reference: "高纬度地区的自然光现象。" }
+            ],
+            "物品": [
+                { word: "书包", difficulty: 1, reference: "学生装书的必备用品。" },
+                { word: "水杯", difficulty: 1, reference: "日常饮水的容器。" },
+                { word: "耳机", difficulty: 1, reference: "听音乐或学习的个人音频设备。" },
+                { word: "台灯", difficulty: 2, reference: "夜间学习的照明工具。" },
+                { word: "雨伞", difficulty: 1, reference: "遮风挡雨的日常用品。" },
+                { word: "充电宝", difficulty: 2, reference: "移动电源，外出必备。" },
+                { word: "相机", difficulty: 3, reference: "记录美好瞬间的设备。" },
+                { word: "望远镜", difficulty: 4, reference: "观察远处物体的光学仪器。" }
+            ],
+            "校园生存": [
+                { word: "选课", difficulty: 2, reference: "每学期的重要任务，需要抢课。" },
+                { word: "考试", difficulty: 1, reference: "检验学习成果的方式。" },
+                { word: "社团", difficulty: 2, reference: "课余时间参与的组织活动。" },
+                { word: "奖学金", difficulty: 3, reference: "对优秀学生的奖励制度。" },
+                { word: "实习", difficulty: 3, reference: "理论联系实际的重要环节。" },
+                { word: "毕业", difficulty: 2, reference: "学生生涯的重要节点。" },
+                { word: "论文", difficulty: 4, reference: "学术研究成果的书面表达。" },
+                { word: "招聘会", difficulty: 3, reference: "求职的重要渠道。" }
+            ],
+            "学术黑话": [
+                { word: "内卷", difficulty: 2, reference: "过度竞争导致的无效努力。" },
+                { word: "躺平", difficulty: 2, reference: "面对压力选择不竞争的态度。" },
+                { word: "干货", difficulty: 1, reference: "有价值的信息或知识。" },
+                { word: "刷题", difficulty: 2, reference: "大量练习题目提高成绩。" },
+                { word: "划重点", difficulty: 1, reference: "标出重要内容便于复习。" },
+                { word: "挂科", difficulty: 2, reference: "考试不及格的俗称。" },
+                { word: "绩点", difficulty: 3, reference: "衡量学习成绩的重要指标。" },
+                { word: "保研", difficulty: 4, reference: "本科毕业后直接读研究生。" }
+            ],
+            "青春记忆": [
+                { word: "军训", difficulty: 1, reference: "大学新生的第一课，难忘经历。" },
+                { word: "初恋", difficulty: 2, reference: "青春时期美好的感情回忆。" },
+                { word: "毕业照", difficulty: 2, reference: "记录同窗情谊的重要照片。" },
+                { word: "宿舍", difficulty: 1, reference: "大学四年的小家，共同回忆。" },
+                { word: "食堂", difficulty: 1, reference: "承载无数美好用餐时光的地方。" },
+                { word: "图书馆", difficulty: 2, reference: "熬夜奋斗的见证者。" },
+                { word: "社团", difficulty: 2, reference: "结交朋友展示才华的平台。" },
+                { word: "运动会", difficulty: 2, reference: "展现青春活力的集体活动。" }
+            ]
+        };
+
+        // 展平词库为数组
+        let words = [];
+        for (let category in wordLibrary) {
+            wordLibrary[category].forEach(item => {
+                words.push({
+                    ...item,
+                    category: category
+                });
+            });
+        }
+
+        // 当前题目索引
+        let currentIndex = 0;
+        // 收藏的题目索引
+        let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
+
+        // DOM元素
+        const elements = {
+            card: document.getElementById('card'),
+            category: document.getElementById('category'),
+            word: document.getElementById('word'),
+            difficulty: document.getElementById('difficulty'),
+            reference: document.getElementById('reference'),
+            currentNum: document.getElementById('current-num'),
+            totalNum: document.getElementById('total-num'),
+            prevBtn: document.getElementById('prev-btn'),
+            nextBtn: document.getElementById('next-btn'),
+            randomBtn: document.getElementById('random-btn'),
+            favoriteBtn: document.getElementById('favorite-btn')
+        };
+
+        // 更新显示
+        function updateDisplay() {
+            const item = words[currentIndex];
+            
+            elements.category.textContent = item.category;
+            elements.word.textContent = item.word;
+            
+            // 更新难度星级
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += `<span class="star ${i <= item.difficulty ? 'filled' : ''}">${i <= item.difficulty ? '★' : '☆'}</span>`;
+            }
+            elements.difficulty.innerHTML = stars;
+            
+            elements.reference.innerHTML = `<strong>参考内容：</strong>${item.reference}`;
+            
+            elements.currentNum.textContent = currentIndex + 1;
+            elements.totalNum.textContent = words.length;
+            
+            // 更新收藏按钮状态
+            elements.favoriteBtn.classList.toggle('active', favorites.has(currentIndex));
+        }
+
+        // 切换到指定题目
+        function goToIndex(index) {
+            if (index >= 0 && index < words.length) {
+                currentIndex = index;
+                updateDisplay();
+            }
+        }
+
+        // 下一题
+        function nextQuestion() {
+            currentIndex = (currentIndex + 1) % words.length;
+            updateDisplay();
+        }
+
+        // 上一题
+        function prevQuestion() {
+            currentIndex = (currentIndex - 1 + words.length) % words.length;
+            updateDisplay();
+        }
+
+        // 随机题目
+        function randomQuestion() {
+            let newIndex;
+            do {
+                newIndex = Math.floor(Math.random() * words.length);
+            } while (newIndex === currentIndex && words.length > 1);
+            currentIndex = newIndex;
+            updateDisplay();
+        }
+
+        // 切换收藏状态
+        function toggleFavorite() {
+            if (favorites.has(currentIndex)) {
+                favorites.delete(currentIndex);
+            } else {
+                favorites.add(currentIndex);
+            }
+            localStorage.setItem('favorites', JSON.stringify([...favorites]));
+            updateDisplay();
+        }
+
+        // 手势支持
+        let startX = 0;
+        let startY = 0;
+
+        elements.card.addEventListener('touchstart', function(e) {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+
+        elements.card.addEventListener('touchend', function(e) {
+            if (!startX || !startY) return;
+            
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            
+            const diffX = startX - endX;
+            const diffY = startY - endY;
+            
+            // 水平滑动距离大于垂直滑动距离，且超过阈值
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) {
+                    nextQuestion(); // 左滑
+                } else {
+                    prevQuestion(); // 右滑
+                }
+            }
+            
+            startX = 0;
+            startY = 0;
+        });
+
+        // 事件监听
+        elements.nextBtn.addEventListener('click', nextQuestion);
+        elements.prevBtn.addEventListener('click', prevQuestion);
+        elements.randomBtn.addEventListener('click', randomQuestion);
+        elements.favoriteBtn.addEventListener('click', toggleFavorite);
+
+        // 键盘支持
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    prevQuestion();
+                    break;
+                case 'ArrowRight':
+                    nextQuestion();
+                    break;
+                case ' ':
+                    randomQuestion();
+                    e.preventDefault();
+                    break;
+                case 'f':
+                case 'F':
+                    toggleFavorite();
+                    break;
+            }
+        });
+
+        // 初始化
+        elements.totalNum.textContent = words.length;
+        updateDisplay();
+    </script>
+</body>
+</html>
