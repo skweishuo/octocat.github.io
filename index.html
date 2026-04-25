@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>你画我猜优化版</title>
     <style>
         * {
@@ -11,39 +11,24 @@
             box-sizing: border-box;
         }
 
-        html {
-            min-height: 100%;
-            -webkit-text-size-adjust: 100%;
-        }
-
         body {
             font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: rgba(255, 255, 255, 0.98);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            min-height: 100dvh;
-            margin: 0;
             display: flex;
-            justify-content: stretch;
-            align-items: stretch;
-            padding: 0;
-            overflow-x: hidden;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            touch-action: manipulation;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
         .container {
             width: 100%;
-            max-width: none;
-            min-height: 100vh;
-            min-height: 100dvh;
-            margin: 0;
+            max-width: 500px;
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 0;
-            box-shadow: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
             backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
         }
 
         .header {
@@ -110,20 +95,15 @@
         }
 
         .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            display: flex;
             gap: 15px;
             margin-bottom: 20px;
-        }
-
-        .controls .btn-warning {
-            grid-column: 1 / -1;
+            flex-wrap: wrap;
         }
 
         .btn {
             flex: 1;
-            min-width: 0;
-            width: 100%;
+            min-width: 120px;
             padding: 15px 20px;
             border: none;
             border-radius: 12px;
@@ -302,8 +282,8 @@
 
         @media (max-width: 768px) {
             .container {
-                margin: 0;
-                border-radius: 0;
+                margin: 10px;
+                border-radius: 15px;
             }
 
             .header h1 {
@@ -329,6 +309,14 @@
         }
 
         @media (max-width: 480px) {
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
             .word {
                 font-size: 1.5rem;
             }
@@ -338,103 +326,6 @@
                 height: 120px;
                 font-size: 1rem;
             }
-        }
-
-        /* 时间到 — 自定义弹层 */
-        .timeup-modal[hidden] {
-            display: none !important;
-        }
-
-        .timeup-modal {
-            position: fixed;
-            inset: 0;
-            z-index: 10000;
-            display: grid;
-            place-items: center;
-            padding: 24px;
-            box-sizing: border-box;
-        }
-
-        .timeup-modal__backdrop {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.48);
-            backdrop-filter: blur(8px);
-        }
-
-        .timeup-modal__card {
-            position: relative;
-            width: min(92vw, 360px);
-            padding: 26px 22px 22px;
-            border-radius: 18px;
-            background: #fff;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
-            text-align: center;
-            animation: timeup-pop 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-        }
-
-        @keyframes timeup-pop {
-            from {
-                opacity: 0;
-                transform: scale(0.9) translateY(12px);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-
-        .timeup-modal__icon {
-            font-size: 2.75rem;
-            line-height: 1;
-            margin-bottom: 6px;
-        }
-
-        .timeup-modal__title {
-            margin: 0 0 8px;
-            font-size: 1.45rem;
-            font-weight: 700;
-            color: #ee5a24;
-        }
-
-        .timeup-modal__desc {
-            margin: 0 0 14px;
-            font-size: 0.9rem;
-            color: #6c757d;
-            line-height: 1.5;
-        }
-
-        .timeup-modal__score {
-            margin: 0 0 22px;
-            font-size: 1.15rem;
-            color: #2d3436;
-        }
-
-        .timeup-modal__score strong {
-            color: #00b894;
-            font-size: 1.35rem;
-        }
-
-        .timeup-modal__btn {
-            width: 100%;
-            border: none;
-            border-radius: 12px;
-            padding: 14px 16px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            color: #fff;
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.35);
-        }
-
-        .timeup-modal__btn:active {
-            transform: scale(0.98);
-        }
-
-        body.timeup-modal-open {
-            overflow: hidden;
-            touch-action: none;
         }
     </style>
 </head>
@@ -509,19 +400,18 @@
                             <button class="category-btn" data-category="place">地名景点</button>
                         </div>
                     </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label" for="noRepeatSelect">🔁 不重复冷却（按最近词数）</label>
+                        <select id="noRepeatSelect" onchange="setNoRepeatCount(this.value)" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; background: white;">
+                            <option value="10">最近 10 个词不重复</option>
+                            <option value="20" selected>最近 20 个词不重复（推荐）</option>
+                            <option value="30">最近 30 个词不重复</option>
+                            <option value="50">最近 50 个词不重复</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div id="timeupModal" class="timeup-modal" hidden role="dialog" aria-modal="true" aria-labelledby="timeupTitle">
-        <div class="timeup-modal__backdrop" onclick="closeTimeUpModal()"></div>
-        <div class="timeup-modal__card">
-            <div class="timeup-modal__icon" aria-hidden="true">⏱</div>
-            <h2 id="timeupTitle" class="timeup-modal__title">时间到</h2>
-            <p class="timeup-modal__desc">本轮挑战结束，看看你们答对了几题。</p>
-            <p class="timeup-modal__score">答对 <strong id="timeupScore">0</strong> 题</p>
-            <button type="button" class="timeup-modal__btn" onclick="closeTimeUpModal()">知道了</button>
         </div>
     </div>
 
@@ -530,47 +420,69 @@
         const wordLibrary = {
             hot: [
                 "躺平", "内卷", "破防", "绝绝子", "yyds", "emo", "社死", "摆烂",
-                "凡尔赛", "打工人", "摸鱼", "干饭人", "真香", "奥力给", "冲鸭"
+                "凡尔赛", "打工人", "摸鱼", "干饭人", "真香", "奥力给", "冲鸭",
+                "显眼包", "拿捏", "CPU我", "栓Q", "上头", "无语子", "整活", "逆天",
+                "小作文", "开摆", "电子榨菜", "天花板", "双向奔赴", "有点东西"
             ],
             music: [
                 "青花瓷", "告白气球", "夜曲", "稻香", "七里香", "晴天", "双截棍",
-                "龙拳", "本草纲目", "小苹果", "最炫民族风", "忐忑", "我的滑板鞋"
+                "龙拳", "本草纲目", "小苹果", "最炫民族风", "忐忑", "我的滑板鞋",
+                "孤勇者", "起风了", "平凡之路", "后来", "十年", "演员", "红昭愿",
+                "听妈妈的话", "一路生花", "夜空中最亮的星", "小幸运", "爱你"
             ],
             movie: [
                 "复仇者联盟", "速度与激情", "变形金刚", "哈利波特", "泰坦尼克号",
-                "阿凡达", "盗梦空间", "肖申克的救赎", "霸王别姬", "哪吒之魔童降世"
+                "阿凡达", "盗梦空间", "肖申克的救赎", "霸王别姬", "哪吒之魔童降世",
+                "流浪地球", "长津湖", "让子弹飞", "唐人街探案", "我不是药神", "少年的你",
+                "疯狂动物城", "寻梦环游记", "你好，李焕英", "热辣滚烫"
             ],
             idiom: [
                 "一心一意", "三心二意", "四面八方", "五湖四海", "六神无主",
-                "七上八下", "九牛一毛", "十全十美", "一心二用", "三顾茅庐"
+                "七上八下", "九牛一毛", "十全十美", "一心二用", "三顾茅庐",
+                "画蛇添足", "守株待兔", "掩耳盗铃", "滥竽充数", "刻舟求剑", "狐假虎威",
+                "亡羊补牢", "对牛弹琴", "画龙点睛", "井底之蛙"
             ],
             common: [
                 "电脑", "手机", "汽车", "飞机", "火车", "轮船", "自行车", "冰箱",
-                "洗衣机", "电视机", "空调", "微波炉", "电饭煲", "吸尘器"
+                "洗衣机", "电视机", "空调", "微波炉", "电饭煲", "吸尘器",
+                "充电宝", "打印机", "投影仪", "电动车", "路由器", "耳机", "台灯",
+                "书包", "雨伞", "牙刷", "毛巾", "眼镜"
             ],
             star: [
                 "周杰伦", "邓紫棋", "薛之谦", "沈腾", "贾玲", "杨幂", "赵丽颖",
-                "刘德华", "周星驰", "成龙", "吴京", "胡歌", "刘亦菲", "王一博"
+                "刘德华", "周星驰", "成龙", "吴京", "胡歌", "刘亦菲", "王一博",
+                "张艺兴", "易烊千玺", "鹿晗", "白敬亭", "迪丽热巴", "杨紫", "肖战",
+                "李现", "华晨宇", "张靓颖", "张学友", "梁朝伟"
             ],
             anime: [
                 "原神", "王者荣耀", "塞尔达传说", "宝可梦", "火影忍者", "海贼王",
-                "进击的巨人", "名侦探柯南", "哆啦A梦", "海绵宝宝", "熊出没", "黑神话悟空"
+                "进击的巨人", "名侦探柯南", "哆啦A梦", "海绵宝宝", "熊出没", "黑神话悟空",
+                "我的世界", "英雄联盟", "崩坏：星穹铁道", "第五人格", "鬼灭之刃", "咒术回战",
+                "灌篮高手", "龙珠", "间谍过家家", "银魂"
             ],
             animal: [
                 "大熊猫", "长颈鹿", "考拉", "企鹅", "海豚", "孔雀", "仙人掌",
-                "向日葵", "银杏", "竹子", "含羞草", "猪笼草", "君子兰"
+                "向日葵", "银杏", "竹子", "含羞草", "猪笼草", "君子兰",
+                "梅花鹿", "树懒", "猫头鹰", "北极熊", "丹顶鹤", "蒲公英", "玫瑰",
+                "荷花", "松树", "樱花", "芦苇"
             ],
             food: [
                 "火锅", "奶茶", "螺蛳粉", "煎饼果子", "肉夹馍", "小笼包", "兰州拉面",
-                "北京烤鸭", "臭豆腐", "冰粉", "蛋挞", "寿司", "披萨"
+                "北京烤鸭", "臭豆腐", "冰粉", "蛋挞", "寿司", "披萨",
+                "麻辣烫", "烤冷面", "酸菜鱼", "炸鸡", "牛排", "沙拉", "糖醋里脊",
+                "扬州炒饭", "担担面", "椰子鸡", "杨枝甘露"
             ],
             sport: [
                 "篮球", "足球", "乒乓球", "羽毛球", "游泳", "马拉松", "滑雪",
-                "滑板", "攀岩", "瑜伽", "拳击", "排球", "网球"
+                "滑板", "攀岩", "瑜伽", "拳击", "排球", "网球",
+                "高尔夫", "橄榄球", "棒球", "台球", "跳绳", "体操", "射箭",
+                "击剑", "短道速滑", "举重", "龙舟"
             ],
             place: [
                 "长城", "故宫", "西湖", "黄山", "九寨沟", "布达拉宫", "外滩",
-                "天安门", "兵马俑", "泰山", "桂林山水", "丽江古城", "大三巴"
+                "天安门", "兵马俑", "泰山", "桂林山水", "丽江古城", "大三巴",
+                "张家界", "鼓浪屿", "青海湖", "洱海", "乌镇", "婺源", "稻城亚丁",
+                "三亚", "喀纳斯", "平遥古城", "澳门塔"
             ]
         };
 
@@ -584,7 +496,9 @@
             selectedCategory: "all",
             selectedTime: 120,
             timer: null,
-            usedWords: []
+            usedWords: [],
+            recentWords: [],
+            noRepeatCount: 20
         };
 
         // 初始化分类按钮事件
@@ -609,6 +523,7 @@
             gameState.timeLeft = gameState.selectedTime;
             gameState.score = 0;
             gameState.usedWords = [];
+            gameState.recentWords = [];
             
             if (gameState.timer) {
                 clearInterval(gameState.timer);
@@ -685,26 +600,11 @@
                 gameState.timer = null;
             }
             updateTimerToggleButton();
-
+            
             setTimeout(() => {
-                showTimeUpModal(gameState.score);
-            }, 100);
-        }
-
-        function showTimeUpModal(score) {
-            const modal = document.getElementById('timeupModal');
-            document.getElementById('timeupScore').textContent = String(score);
-            modal.removeAttribute('hidden');
-            document.body.classList.add('timeup-modal-open');
-        }
-
-        function closeTimeUpModal() {
-            const modal = document.getElementById('timeupModal');
-            if (!modal.hasAttribute('hidden')) {
-                modal.setAttribute('hidden', '');
-                document.body.classList.remove('timeup-modal-open');
+                alert(`游戏结束！\n你答对了 ${gameState.score} 道题！`);
                 resetGame();
-            }
+            }, 100);
         }
 
         // 获取随机词语
@@ -722,18 +622,28 @@
             if (words.length === 0) {
                 return "暂无词语";
             }
-            
-            // 过滤已使用的词语
-            const availableWords = words.filter(word => !gameState.usedWords.includes(word));
-            
-            if (availableWords.length === 0) {
-                gameState.usedWords = [];
-                return words[Math.floor(Math.random() * words.length)];
-            }
-            
-            const randomWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+
+            // 按最近 N 个词做冷却，避免短时间内重复
+            const availableWords = words.filter(word => !gameState.recentWords.includes(word));
+            const pool = availableWords.length > 0 ? availableWords : words;
+            const randomWord = pool[Math.floor(Math.random() * pool.length)];
+
             gameState.usedWords.push(randomWord);
+            gameState.recentWords.push(randomWord);
+            const cap = Math.max(1, Number(gameState.noRepeatCount) || 1);
+            if (gameState.recentWords.length > cap) {
+                gameState.recentWords.shift();
+            }
             return randomWord;
+        }
+
+        function setNoRepeatCount(count) {
+            const parsed = Number(count);
+            gameState.noRepeatCount = Number.isFinite(parsed) ? parsed : 20;
+            const cap = Math.max(1, gameState.noRepeatCount);
+            if (gameState.recentWords.length > cap) {
+                gameState.recentWords = gameState.recentWords.slice(-cap);
+            }
         }
 
         // 切换到下一个词语
@@ -782,6 +692,7 @@
             gameState.score = 0;
             gameState.currentWord = "";
             gameState.usedWords = [];
+            gameState.recentWords = [];
             
             document.getElementById('startScreen').style.display = 'block';
             document.getElementById('gameScreen').style.display = 'none';
