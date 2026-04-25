@@ -2,538 +2,663 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>高校你画我猜词库</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你画我猜优化版</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 20px;
-            color: #333;
         }
 
         .container {
+            width: 100%;
             max-width: 500px;
-            margin: 0 auto;
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
         .header {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
             text-align: center;
-            margin-bottom: 30px;
+            padding: 20px;
         }
 
         .header h1 {
-            color: #4a90e2;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 600;
             margin-bottom: 10px;
         }
 
-        .progress {
-            font-size: 0.9rem;
-            color: #666;
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
         }
 
-        .card {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 30px;
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .timer {
+            color: #ff6b6b !important;
+        }
+
+        .main-content {
+            padding: 20px;
+        }
+
+        .word-display {
             text-align: center;
             margin-bottom: 30px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .category {
-            background: #4a90e2;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            display: inline-block;
-            margin-bottom: 20px;
         }
 
         .word {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: bold;
-            color: #333;
+            color: #2d3436;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
             margin-bottom: 20px;
-            word-break: break-all;
+            flex-wrap: wrap;
         }
 
-        .difficulty {
-            margin-bottom: 20px;
+        .btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
         }
 
-        .star {
-            color: #ddd;
-            font-size: 1.5rem;
-            margin: 0 2px;
+        .btn:active {
+            transform: scale(0.95);
         }
 
-        .star.filled {
-            color: #ffd700;
+        .btn-primary {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
         }
 
-        .reference {
-            background: #e3f2fd;
-            border-radius: 10px;
-            padding: 15px;
-            font-size: 0.9rem;
-            color: #666;
+        .btn-success {
+            background: linear-gradient(45deg, #00b894, #55efc4);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #ff7675, #fd79a8);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 118, 117, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #fdcb6e, #e17055);
+            color: white;
+            box-shadow: 0 4px 15px rgba(253, 203, 110, 0.3);
+        }
+
+        .settings {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
             margin-top: 20px;
         }
 
-        .reference strong {
-            color: #4a90e2;
+        .setting-group {
+            margin-bottom: 15px;
         }
 
-        .nav-bar {
+        .setting-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .time-options {
             display: flex;
-            justify-content: space-around;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .time-btn {
+            flex: 1;
+            min-width: 80px;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
             background: white;
-            padding: 15px 0;
-            border-top: 1px solid #eee;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-width: 500px;
-            margin: 0 auto;
-            border-radius: 0 0 20px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .nav-btn {
-            min-width: 44px;
-            min-height: 44px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 25px;
-            background: #4a90e2;
+        .time-btn.active {
+            border-color: #00b894;
+            background: #00b894;
             color: white;
-            font-size: 0.9rem;
+        }
+
+        .timer-control-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .timer-toggle-btn {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.35);
+        }
+
+        .timer-toggle-btn:hover {
+            filter: brightness(1.05);
+        }
+
+        .timer-toggle-btn.paused-style {
+            background: linear-gradient(45deg, #00b894, #00cec9);
+        }
+
+        .timer-toggle-btn:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            filter: none;
+        }
+
+        .timer-hint {
+            width: 100%;
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-top: 6px;
+        }
+
+        .category-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+            gap: 10px;
+        }
+
+        .category-btn {
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .category-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .start-screen {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .start-btn {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 20px 40px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+            margin: 20px auto;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s;
-            touch-action: manipulation;
         }
 
-        .nav-btn:active {
-            transform: scale(0.95);
-            background: #357abd;
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 25px 50px rgba(255, 107, 107, 0.5);
         }
 
-        .favorite-btn {
-            background: #ff6b6b;
-        }
-
-        .favorite-btn.active {
-            background: #ff4757;
-        }
-
-        .landscape-hint {
+        .game-screen {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            color: white;
-            font-size: 1.2rem;
-            text-align: center;
-            padding: 50px;
-            z-index: 1000;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
-        .landscape-hint p {
-            margin-bottom: 20px;
-        }
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
 
-        @media (orientation: landscape) and (max-height: 500px) {
-            .landscape-hint {
-                display: flex;
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .word {
+                font-size: 2rem;
+                padding: 15px;
+            }
+
+            .btn {
+                min-width: 100px;
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+
+            .start-btn {
+                width: 150px;
+                height: 150px;
+                font-size: 1.2rem;
             }
         }
 
         @media (max-width: 480px) {
-            body {
-                padding: 10px;
+            .controls {
+                flex-direction: column;
             }
-            .container {
-                border-radius: 15px;
-                padding: 15px;
+
+            .btn {
+                width: 100%;
             }
-            .card {
-                padding: 20px;
-            }
+
             .word {
                 font-size: 1.5rem;
+            }
+
+            .start-btn {
+                width: 120px;
+                height: 120px;
+                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="landscape-hint">
-        <p>请将手机竖屏使用以获得最佳体验</p>
-        <div>📱</div>
-    </div>
-
     <div class="container">
         <div class="header">
-            <h1>高校你画我猜</h1>
-            <div class="progress">第 <span id="current-num">1</span> 题 / 共 <span id="total-num">100</span> 题</div>
+            <h1>🎨 你画我猜优化版</h1>
+            <p>考验默契与想象力的趣味游戏</p>
         </div>
 
-        <div class="card" id="card">
-            <div class="category" id="category">动物</div>
-            <div class="word" id="word">猫咪</div>
-            <div class="difficulty" id="difficulty">
-                <span class="star filled">★</span>
-                <span class="star filled">★</span>
-                <span class="star">☆</span>
-                <span class="star">☆</span>
-                <span class="star">☆</span>
-            </div>
-            <div class="reference" id="reference">
-                <strong>参考内容：</strong>校园里常见的可爱动物，经常出现在宿舍楼下讨食。
+        <div class="start-screen" id="startScreen">
+            <h2 style="margin-bottom: 30px; color: #6c757d;">准备好了吗？</h2>
+            <button class="start-btn" onclick="startGame()">开始游戏</button>
+            <div style="margin-top: 30px; color: #6c757d;">
+                <p>⏱️ 120秒计时挑战</p>
+                <p>🎯 多种分类词库</p>
+                <p>🏆 实时答题统计</p>
             </div>
         </div>
 
-        <div class="nav-bar">
-            <button class="nav-btn" id="prev-btn" style="background: #6c757d;">上一题</button>
-            <button class="nav-btn favorite-btn" id="favorite-btn">❤ 收藏</button>
-            <button class="nav-btn" id="next-btn">下一题</button>
-            <button class="nav-btn" id="random-btn" style="background: #28a745;">🎲 随机</button>
+        <div class="game-screen" id="gameScreen">
+            <div class="game-info">
+                <div class="info-item">
+                    <div class="info-label">剩余时间</div>
+                    <div class="info-value timer" id="timer">120s</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">答对题数</div>
+                    <div class="info-value" id="score">0</div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <div class="word-display">
+                    <div class="word" id="currentWord">准备开始...</div>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-success" onclick="nextWord(true)">✅ 答对了</button>
+                    <button class="btn btn-danger" onclick="nextWord(false)">❌ 跳过</button>
+                    <button class="btn btn-warning" onclick="resetGame()">🔄 重置</button>
+                </div>
+
+                <div class="settings">
+                    <div class="setting-group">
+                        <label class="setting-label">⏱️ 游戏时间</label>
+                        <div class="time-options">
+                            <button class="time-btn" onclick="setTime(60, this)">60秒</button>
+                            <button class="time-btn" onclick="setTime(90, this)">90秒</button>
+                            <button class="time-btn active" onclick="setTime(120, this)">120秒</button>
+                        </div>
+                        <div class="timer-control-row">
+                            <button type="button" class="timer-toggle-btn paused-style" id="timerToggleBtn" onclick="toggleTimer()">▶ 开始计时</button>
+                        </div>
+                        <p class="timer-hint">切换秒数会暂停倒计时，需再点「开始计时」才会走表。</p>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label">📚 词语分类</label>
+                        <div class="category-options">
+                            <button class="category-btn active" data-category="all">全部</button>
+                            <button class="category-btn" data-category="hot">网络热梗</button>
+                            <button class="category-btn" data-category="music">歌名</button>
+                            <button class="category-btn" data-category="movie">影视</button>
+                            <button class="category-btn" data-category="idiom">成语</button>
+                            <button class="category-btn" data-category="common">常识</button>
+                            <button class="category-btn" data-category="star">明星</button>
+                            <button class="category-btn" data-category="anime">动漫游戏</button>
+                            <button class="category-btn" data-category="animal">动物植物</button>
+                            <button class="category-btn" data-category="food">美食</button>
+                            <button class="category-btn" data-category="sport">体育</button>
+                            <button class="category-btn" data-category="place">地名景点</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         // 词库数据
         const wordLibrary = {
-            "动物": [
-                { word: "猫咪", difficulty: 1, reference: "校园里常见的可爱动物，经常出现在宿舍楼下讨食。" },
-                { word: "狗狗", difficulty: 1, reference: "人类最好的朋友，有些同学会在宿舍养。" },
-                { word: "松鼠", difficulty: 2, reference: "在校园树林里跳跃的小动物，喜欢收集坚果。" },
-                { word: "仓鼠", difficulty: 2, reference: "小型宠物，圆滚滚的很可爱，适合宿舍饲养。" },
-                { word: "鹦鹉", difficulty: 3, reference: "会学人说话的鸟类，有些同学会在宿舍养。" },
-                { word: "刺猬", difficulty: 3, reference: "身上有刺的小动物，近年来成为网红宠物。" },
-                { word: "蜥蜴", difficulty: 4, reference: "爬行动物，有些同学会养变色龙等品种。" },
-                { word: "蜜袋鼯", difficulty: 5, reference: "会滑翔的小动物，需要专业饲养知识。" }
+            hot: [
+                "躺平", "内卷", "破防", "绝绝子", "yyds", "emo", "社死", "摆烂",
+                "凡尔赛", "打工人", "摸鱼", "干饭人", "真香", "奥力给", "冲鸭"
             ],
-            "美食": [
-                { word: "食堂", difficulty: 1, reference: "学生们日常用餐的地方，有不同的窗口。" },
-                { word: "火锅", difficulty: 1, reference: "聚餐必备，冬天最受欢迎的美食。" },
-                { word: "奶茶", difficulty: 1, reference: "学生们最爱的饮品，各种口味应有尽有。" },
-                { word: "烧烤", difficulty: 2, reference: "夜宵首选，宿舍楼下经常能闻到香味。" },
-                { word: "麻辣烫", difficulty: 2, reference: "自选食材的麻辣美食，价格实惠。" },
-                { word: "煎饼果子", difficulty: 2, reference: "早餐热门选择，现做现卖。" },
-                { word: "螺蛳粉", difficulty: 3, reference: "有特殊气味的广西特色美食，爱憎分明。" },
-                { word: "日料", difficulty: 4, reference: "精致的日本料理，价格相对较高。" },
-                { word: "法餐", difficulty: 5, reference: "高端西餐，浪漫约会的选择。" }
+            music: [
+                "青花瓷", "告白气球", "夜曲", "稻香", "七里香", "晴天", "双截棍",
+                "龙拳", "本草纲目", "小苹果", "最炫民族风", "忐忑", "我的滑板鞋"
             ],
-            "交通": [
-                { word: "地铁", difficulty: 1, reference: "城市主要交通工具，学生通勤常用。" },
-                { word: "公交", difficulty: 1, reference: "覆盖面广的公共交通工具。" },
-                { word: "自行车", difficulty: 1, reference: "校园内最常见的代步工具。" },
-                { word: "共享单车", difficulty: 2, reference: "扫码即用的便利交通工具。" },
-                { word: "电动车", difficulty: 2, reference: "省力的代步工具，需要充电。" },
-                { word: "出租车", difficulty: 2, reference: "便捷但相对较贵的出行方式。" },
-                { word: "高铁", difficulty: 3, reference: "快速的城际交通工具。" },
-                { word: "飞机", difficulty: 3, reference: "长途旅行的主要方式。" },
-                { word: "轮船", difficulty: 4, reference: "水上交通工具，用于特定航线。" }
+            movie: [
+                "复仇者联盟", "速度与激情", "变形金刚", "哈利波特", "泰坦尼克号",
+                "阿凡达", "盗梦空间", "肖申克的救赎", "霸王别姬", "哪吒之魔童降世"
             ],
-            "运动": [
-                { word: "篮球", difficulty: 1, reference: "最受欢迎的校园运动，男生最爱。" },
-                { word: "跑步", difficulty: 1, reference: "最简单的运动方式，操场常见。" },
-                { word: "羽毛球", difficulty: 2, reference: "室内外都可以进行的运动。" },
-                { word: "游泳", difficulty: 2, reference: "全身性运动，需要专门的场地。" },
-                { word: "瑜伽", difficulty: 2, reference: "修身养性的运动，女生较多参与。" },
-                { word: "乒乓球", difficulty: 2, reference: "国球，学校体育馆常设项目。" },
-                { word: "网球", difficulty: 3, reference: "需要专门场地和装备的运动。" },
-                { word: "攀岩", difficulty: 4, reference: "极限运动，需要专业指导。" },
-                { word: "马拉松", difficulty: 5, reference: "长距离跑步比赛，考验耐力。" }
+            idiom: [
+                "一心一意", "三心二意", "四面八方", "五湖四海", "六神无主",
+                "七上八下", "九牛一毛", "十全十美", "一心二用", "三顾茅庐"
             ],
-            "科技": [
-                { word: "手机", difficulty: 1, reference: "学生必备的通讯工具，不离身。" },
-                { word: "电脑", difficulty: 1, reference: "学习和娱乐的重要工具。" },
-                { word: "WiFi", difficulty: 1, reference: "校园网络基础设施，不可或缺。" },
-                { word: "APP", difficulty: 2, reference: "手机应用程序，各种功能都有。" },
-                { word: "AI", difficulty: 3, reference: "人工智能，当前热门技术。" },
-                { word: "VR", difficulty: 4, reference: "虚拟现实技术，沉浸式体验。" },
-                { word: "区块链", difficulty: 5, reference: "分布式账本技术，金融创新。" },
-                { word: "量子计算", difficulty: 5, reference: "前沿计算技术，理论阶段。" }
+            common: [
+                "电脑", "手机", "汽车", "飞机", "火车", "轮船", "自行车", "冰箱",
+                "洗衣机", "电视机", "空调", "微波炉", "电饭煲", "吸尘器"
             ],
-            "文化": [
-                { word: "图书馆", difficulty: 1, reference: "学习圣地，自习的好地方。" },
-                { word: "博物馆", difficulty: 2, reference: "文化展示场所，增长见识。" },
-                { word: "书法", difficulty: 2, reference: "传统文化艺术，修身养性。" },
-                { word: "诗词", difficulty: 2, reference: "古典文学形式，意境深远。" },
-                { word: "戏曲", difficulty: 3, reference: "传统表演艺术，国粹之一。" },
-                { word: "民俗", difficulty: 3, reference: "民间文化传统，地域特色。" },
-                { word: "非遗", difficulty: 4, reference: "非物质文化遗产，需要保护。" },
-                { word: "考古", difficulty: 4, reference: "研究古代文化的学科。" }
+            star: [
+                "周杰伦", "邓紫棋", "薛之谦", "沈腾", "贾玲", "杨幂", "赵丽颖",
+                "刘德华", "周星驰", "成龙", "吴京", "胡歌", "刘亦菲", "王一博"
             ],
-            "娱乐": [
-                { word: "电影", difficulty: 1, reference: "休闲娱乐方式，周末常选。" },
-                { word: "KTV", difficulty: 1, reference: "唱歌娱乐场所，聚会热门。" },
-                { word: "游戏", difficulty: 1, reference: "电子娱乐，课余时间消遣。" },
-                { word: "演唱会", difficulty: 2, reference: "现场音乐表演，粉丝狂热。" },
-                { word: "游乐园", difficulty: 2, reference: "娱乐设施集中的地方。" },
-                { word: "剧本杀", difficulty: 3, reference: "新兴社交推理游戏。" },
-                { word: "密室逃脱", difficulty: 3, reference: "沉浸式解谜游戏。" },
-                { word: "脱口秀", difficulty: 4, reference: "语言类表演艺术。" }
+            anime: [
+                "原神", "王者荣耀", "塞尔达传说", "宝可梦", "火影忍者", "海贼王",
+                "进击的巨人", "名侦探柯南", "哆啦A梦", "海绵宝宝", "熊出没", "黑神话悟空"
             ],
-            "艺术": [
-                { word: "绘画", difficulty: 1, reference: "视觉艺术，表达创意的方式。" },
-                { word: "音乐", difficulty: 1, reference: "听觉艺术，陶冶情操。" },
-                { word: "舞蹈", difficulty: 2, reference: "肢体艺术，需要练习。" },
-                { word: "雕塑", difficulty: 3, reference: "立体艺术形式，创作周期长。" },
-                { word: "摄影", difficulty: 2, reference: "记录美好瞬间的艺术。" },
-                { word: "陶艺", difficulty: 3, reference: "传统手工艺，需要技巧。" },
-                { word: "装置艺术", difficulty: 4, reference: "现代艺术形式，概念性强。" },
-                { word: "行为艺术", difficulty: 5, reference: "前卫艺术形式，表达观念。" }
+            animal: [
+                "大熊猫", "长颈鹿", "考拉", "企鹅", "海豚", "孔雀", "仙人掌",
+                "向日葵", "银杏", "竹子", "含羞草", "猪笼草", "君子兰"
             ],
-            "职业": [
-                { word: "老师", difficulty: 1, reference: "传道授业解惑的职业。" },
-                { word: "医生", difficulty: 1, reference: "救死扶伤的白衣天使。" },
-                { word: "程序员", difficulty: 2, reference: "编写代码的技术工作者。" },
-                { word: "设计师", difficulty: 2, reference: "创造美观实用作品的职业。" },
-                { word: "记者", difficulty: 2, reference: "报道新闻的媒体工作者。" },
-                { word: "律师", difficulty: 3, reference: "法律专业人士，维护正义。" },
-                { word: "心理咨询师", difficulty: 3, reference: "帮助解决心理问题的职业。" },
-                { word: "宇航员", difficulty: 5, reference: "探索太空的特殊职业。" }
+            food: [
+                "火锅", "奶茶", "螺蛳粉", "煎饼果子", "肉夹馍", "小笼包", "兰州拉面",
+                "北京烤鸭", "臭豆腐", "冰粉", "蛋挞", "寿司", "披萨"
             ],
-            "自然": [
-                { word: "阳光", difficulty: 1, reference: "万物生长的能源来源。" },
-                { word: "雨水", difficulty: 1, reference: "滋润大地的天然水源。" },
-                { word: "花朵", difficulty: 1, reference: "植物的繁殖器官，色彩缤纷。" },
-                { word: "森林", difficulty: 2, reference: "树木密集的生态系统。" },
-                { word: "海洋", difficulty: 2, reference: "广阔的水域，生命摇篮。" },
-                { word: "星空", difficulty: 2, reference: "夜空中闪烁的天体集合。" },
-                { word: "瀑布", difficulty: 3, reference: "从高处落下的壮观水流。" },
-                { word: "极光", difficulty: 4, reference: "高纬度地区的自然光现象。" }
+            sport: [
+                "篮球", "足球", "乒乓球", "羽毛球", "游泳", "马拉松", "滑雪",
+                "滑板", "攀岩", "瑜伽", "拳击", "排球", "网球"
             ],
-            "物品": [
-                { word: "书包", difficulty: 1, reference: "学生装书的必备用品。" },
-                { word: "水杯", difficulty: 1, reference: "日常饮水的容器。" },
-                { word: "耳机", difficulty: 1, reference: "听音乐或学习的个人音频设备。" },
-                { word: "台灯", difficulty: 2, reference: "夜间学习的照明工具。" },
-                { word: "雨伞", difficulty: 1, reference: "遮风挡雨的日常用品。" },
-                { word: "充电宝", difficulty: 2, reference: "移动电源，外出必备。" },
-                { word: "相机", difficulty: 3, reference: "记录美好瞬间的设备。" },
-                { word: "望远镜", difficulty: 4, reference: "观察远处物体的光学仪器。" }
-            ],
-            "校园生存": [
-                { word: "选课", difficulty: 2, reference: "每学期的重要任务，需要抢课。" },
-                { word: "考试", difficulty: 1, reference: "检验学习成果的方式。" },
-                { word: "社团", difficulty: 2, reference: "课余时间参与的组织活动。" },
-                { word: "奖学金", difficulty: 3, reference: "对优秀学生的奖励制度。" },
-                { word: "实习", difficulty: 3, reference: "理论联系实际的重要环节。" },
-                { word: "毕业", difficulty: 2, reference: "学生生涯的重要节点。" },
-                { word: "论文", difficulty: 4, reference: "学术研究成果的书面表达。" },
-                { word: "招聘会", difficulty: 3, reference: "求职的重要渠道。" }
-            ],
-            "学术黑话": [
-                { word: "内卷", difficulty: 2, reference: "过度竞争导致的无效努力。" },
-                { word: "躺平", difficulty: 2, reference: "面对压力选择不竞争的态度。" },
-                { word: "干货", difficulty: 1, reference: "有价值的信息或知识。" },
-                { word: "刷题", difficulty: 2, reference: "大量练习题目提高成绩。" },
-                { word: "划重点", difficulty: 1, reference: "标出重要内容便于复习。" },
-                { word: "挂科", difficulty: 2, reference: "考试不及格的俗称。" },
-                { word: "绩点", difficulty: 3, reference: "衡量学习成绩的重要指标。" },
-                { word: "保研", difficulty: 4, reference: "本科毕业后直接读研究生。" }
-            ],
-            "青春记忆": [
-                { word: "军训", difficulty: 1, reference: "大学新生的第一课，难忘经历。" },
-                { word: "初恋", difficulty: 2, reference: "青春时期美好的感情回忆。" },
-                { word: "毕业照", difficulty: 2, reference: "记录同窗情谊的重要照片。" },
-                { word: "宿舍", difficulty: 1, reference: "大学四年的小家，共同回忆。" },
-                { word: "食堂", difficulty: 1, reference: "承载无数美好用餐时光的地方。" },
-                { word: "图书馆", difficulty: 2, reference: "熬夜奋斗的见证者。" },
-                { word: "社团", difficulty: 2, reference: "结交朋友展示才华的平台。" },
-                { word: "运动会", difficulty: 2, reference: "展现青春活力的集体活动。" }
+            place: [
+                "长城", "故宫", "西湖", "黄山", "九寨沟", "布达拉宫", "外滩",
+                "天安门", "兵马俑", "泰山", "桂林山水", "丽江古城", "大三巴"
             ]
         };
 
-        // 展平词库为数组
-        let words = [];
-        for (let category in wordLibrary) {
-            wordLibrary[category].forEach(item => {
-                words.push({
-                    ...item,
-                    category: category
-                });
-            });
-        }
-
-        // 当前题目索引
-        let currentIndex = 0;
-        // 收藏的题目索引
-        let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
-
-        // DOM元素
-        const elements = {
-            card: document.getElementById('card'),
-            category: document.getElementById('category'),
-            word: document.getElementById('word'),
-            difficulty: document.getElementById('difficulty'),
-            reference: document.getElementById('reference'),
-            currentNum: document.getElementById('current-num'),
-            totalNum: document.getElementById('total-num'),
-            prevBtn: document.getElementById('prev-btn'),
-            nextBtn: document.getElementById('next-btn'),
-            randomBtn: document.getElementById('random-btn'),
-            favoriteBtn: document.getElementById('favorite-btn')
+        // 全局变量
+        let gameState = {
+            isRunning: false,
+            timerTicking: false,
+            timeLeft: 120,
+            score: 0,
+            currentWord: "",
+            selectedCategory: "all",
+            selectedTime: 120,
+            timer: null,
+            usedWords: []
         };
 
-        // 更新显示
-        function updateDisplay() {
-            const item = words[currentIndex];
+        // 初始化分类按钮事件
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                gameState.selectedCategory = this.dataset.category;
+                if (gameState.isRunning) {
+                    nextWord();
+                }
+            });
+        });
+
+        // 开始游戏
+        function startGame() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'block';
             
-            elements.category.textContent = item.category;
-            elements.word.textContent = item.word;
+            gameState.isRunning = true;
+            gameState.timerTicking = false;
+            gameState.timeLeft = gameState.selectedTime;
+            gameState.score = 0;
+            gameState.usedWords = [];
             
-            // 更新难度星级
-            let stars = '';
-            for (let i = 1; i <= 5; i++) {
-                stars += `<span class="star ${i <= item.difficulty ? 'filled' : ''}">${i <= item.difficulty ? '★' : '☆'}</span>`;
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+                gameState.timer = null;
             }
-            elements.difficulty.innerHTML = stars;
             
-            elements.reference.innerHTML = `<strong>参考内容：</strong>${item.reference}`;
-            
-            elements.currentNum.textContent = currentIndex + 1;
-            elements.totalNum.textContent = words.length;
-            
-            // 更新收藏按钮状态
-            elements.favoriteBtn.classList.toggle('active', favorites.has(currentIndex));
+            updateDisplay();
+            updateTimerToggleButton();
+            nextWord();
         }
 
-        // 切换到指定题目
-        function goToIndex(index) {
-            if (index >= 0 && index < words.length) {
-                currentIndex = index;
+        // 设置游戏时间（切换秒数会暂停走表，需手动点开始）
+        function setTime(seconds, el) {
+            document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+            if (el) el.classList.add('active');
+            gameState.selectedTime = seconds;
+            gameState.timeLeft = seconds;
+            pauseTimer();
+            updateDisplay();
+            updateTimerToggleButton();
+        }
+
+        function pauseTimer() {
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+                gameState.timer = null;
+            }
+            gameState.timerTicking = false;
+            updateTimerToggleButton();
+        }
+
+        // 启动 / 暂停 倒计时（手动控制）
+        function toggleTimer() {
+            if (!gameState.isRunning || gameState.timeLeft <= 0) return;
+            if (gameState.timerTicking) {
+                pauseTimer();
+                return;
+            }
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+            }
+            gameState.timerTicking = true;
+            gameState.timer = setInterval(() => {
+                gameState.timeLeft--;
+                updateDisplay();
+                if (gameState.timeLeft <= 0) {
+                    pauseTimer();
+                    endGame();
+                }
+            }, 1000);
+            updateTimerToggleButton();
+        }
+
+        function updateTimerToggleButton() {
+            const btn = document.getElementById('timerToggleBtn');
+            if (!btn) return;
+            const canStart = gameState.isRunning && gameState.timeLeft > 0;
+            btn.disabled = !canStart;
+            if (gameState.timerTicking) {
+                btn.textContent = '⏸ 暂停';
+                btn.classList.remove('paused-style');
+            } else {
+                btn.textContent = '▶ 开始计时';
+                btn.classList.add('paused-style');
+            }
+        }
+
+        // 结束游戏
+        function endGame() {
+            gameState.isRunning = false;
+            gameState.timerTicking = false;
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+                gameState.timer = null;
+            }
+            updateTimerToggleButton();
+            
+            setTimeout(() => {
+                alert(`游戏结束！\n你答对了 ${gameState.score} 道题！`);
+                resetGame();
+            }, 100);
+        }
+
+        // 获取随机词语
+        function getRandomWord() {
+            let words = [];
+            
+            if (gameState.selectedCategory === "all") {
+                Object.values(wordLibrary).forEach(category => {
+                    words = words.concat(category);
+                });
+            } else {
+                words = wordLibrary[gameState.selectedCategory] || [];
+            }
+            
+            if (words.length === 0) {
+                return "暂无词语";
+            }
+            
+            // 过滤已使用的词语
+            const availableWords = words.filter(word => !gameState.usedWords.includes(word));
+            
+            if (availableWords.length === 0) {
+                gameState.usedWords = [];
+                return words[Math.floor(Math.random() * words.length)];
+            }
+            
+            const randomWord = availableWords[Math.floor(Math.random() * availableWords.length)];
+            gameState.usedWords.push(randomWord);
+            return randomWord;
+        }
+
+        // 切换到下一个词语
+        function nextWord(isCorrect = false) {
+            if (isCorrect && gameState.isRunning) {
+                gameState.score++;
+            }
+            
+            if (gameState.isRunning) {
+                gameState.currentWord = getRandomWord();
                 updateDisplay();
             }
         }
 
-        // 下一题
-        function nextQuestion() {
-            currentIndex = (currentIndex + 1) % words.length;
-            updateDisplay();
-        }
-
-        // 上一题
-        function prevQuestion() {
-            currentIndex = (currentIndex - 1 + words.length) % words.length;
-            updateDisplay();
-        }
-
-        // 随机题目
-        function randomQuestion() {
-            let newIndex;
-            do {
-                newIndex = Math.floor(Math.random() * words.length);
-            } while (newIndex === currentIndex && words.length > 1);
-            currentIndex = newIndex;
-            updateDisplay();
-        }
-
-        // 切换收藏状态
-        function toggleFavorite() {
-            if (favorites.has(currentIndex)) {
-                favorites.delete(currentIndex);
+        // 更新显示
+        function updateDisplay() {
+            document.getElementById('timer').textContent = `${gameState.timeLeft}s`;
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('currentWord').textContent = gameState.currentWord;
+            updateTimerToggleButton();
+            
+            // 时间警告效果
+            if (gameState.timeLeft <= 10) {
+                document.getElementById('timer').style.color = '#ff6b6b';
+                document.getElementById('timer').style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    if (document.getElementById('timer')) {
+                        document.getElementById('timer').style.transform = 'scale(1)';
+                    }
+                }, 500);
             } else {
-                favorites.add(currentIndex);
+                document.getElementById('timer').style.color = '#ff6b6b';
             }
-            localStorage.setItem('favorites', JSON.stringify([...favorites]));
-            updateDisplay();
         }
 
-        // 手势支持
-        let startX = 0;
-        let startY = 0;
-
-        elements.card.addEventListener('touchstart', function(e) {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        });
-
-        elements.card.addEventListener('touchend', function(e) {
-            if (!startX || !startY) return;
-            
-            const endX = e.changedTouches[0].clientX;
-            const endY = e.changedTouches[0].clientY;
-            
-            const diffX = startX - endX;
-            const diffY = startY - endY;
-            
-            // 水平滑动距离大于垂直滑动距离，且超过阈值
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-                if (diffX > 0) {
-                    nextQuestion(); // 左滑
-                } else {
-                    prevQuestion(); // 右滑
-                }
+        // 重置游戏
+        function resetGame() {
+            if (gameState.timer) {
+                clearInterval(gameState.timer);
+                gameState.timer = null;
             }
             
-            startX = 0;
-            startY = 0;
+            gameState.isRunning = false;
+            gameState.timerTicking = false;
+            gameState.timeLeft = gameState.selectedTime;
+            gameState.score = 0;
+            gameState.currentWord = "";
+            gameState.usedWords = [];
+            
+            document.getElementById('startScreen').style.display = 'block';
+            document.getElementById('gameScreen').style.display = 'none';
+            
+            updateDisplay();
+            updateTimerToggleButton();
+        }
+
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDisplay();
         });
-
-        // 事件监听
-        elements.nextBtn.addEventListener('click', nextQuestion);
-        elements.prevBtn.addEventListener('click', prevQuestion);
-        elements.randomBtn.addEventListener('click', randomQuestion);
-        elements.favoriteBtn.addEventListener('click', toggleFavorite);
-
-        // 键盘支持
-        document.addEventListener('keydown', function(e) {
-            switch(e.key) {
-                case 'ArrowLeft':
-                    prevQuestion();
-                    break;
-                case 'ArrowRight':
-                    nextQuestion();
-                    break;
-                case ' ':
-                    randomQuestion();
-                    e.preventDefault();
-                    break;
-                case 'f':
-                case 'F':
-                    toggleFavorite();
-                    break;
-            }
-        });
-
-        // 初始化
-        elements.totalNum.textContent = words.length;
-        updateDisplay();
     </script>
 </body>
 </html>
