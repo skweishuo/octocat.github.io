@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>你画我猜优化版</title>
     <style>
         * {
@@ -11,8 +11,9 @@
             box-sizing: border-box;
         }
 
-        html, body {
-            height: 100%;
+        html {
+            min-height: 100%;
+            -webkit-text-size-adjust: 100%;
         }
 
         body {
@@ -25,6 +26,10 @@
             justify-content: stretch;
             align-items: stretch;
             padding: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            touch-action: manipulation;
         }
 
         .container {
@@ -36,7 +41,6 @@
             background: rgba(255, 255, 255, 0.95);
             border-radius: 0;
             box-shadow: none;
-            overflow: hidden;
             backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
@@ -335,6 +339,103 @@
                 font-size: 1rem;
             }
         }
+
+        /* 时间到 — 自定义弹层 */
+        .timeup-modal[hidden] {
+            display: none !important;
+        }
+
+        .timeup-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        .timeup-modal__backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.48);
+            backdrop-filter: blur(8px);
+        }
+
+        .timeup-modal__card {
+            position: relative;
+            width: min(92vw, 360px);
+            padding: 26px 22px 22px;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+            text-align: center;
+            animation: timeup-pop 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes timeup-pop {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .timeup-modal__icon {
+            font-size: 2.75rem;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .timeup-modal__title {
+            margin: 0 0 8px;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #ee5a24;
+        }
+
+        .timeup-modal__desc {
+            margin: 0 0 14px;
+            font-size: 0.9rem;
+            color: #6c757d;
+            line-height: 1.5;
+        }
+
+        .timeup-modal__score {
+            margin: 0 0 22px;
+            font-size: 1.15rem;
+            color: #2d3436;
+        }
+
+        .timeup-modal__score strong {
+            color: #00b894;
+            font-size: 1.35rem;
+        }
+
+        .timeup-modal__btn {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.35);
+        }
+
+        .timeup-modal__btn:active {
+            transform: scale(0.98);
+        }
+
+        body.timeup-modal-open {
+            overflow: hidden;
+            touch-action: none;
+        }
     </style>
 </head>
 <body>
@@ -410,6 +511,17 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="timeupModal" class="timeup-modal" hidden role="dialog" aria-modal="true" aria-labelledby="timeupTitle">
+        <div class="timeup-modal__backdrop" onclick="closeTimeUpModal()"></div>
+        <div class="timeup-modal__card">
+            <div class="timeup-modal__icon" aria-hidden="true">⏱</div>
+            <h2 id="timeupTitle" class="timeup-modal__title">时间到</h2>
+            <p class="timeup-modal__desc">本轮挑战结束，看看你们答对了几题。</p>
+            <p class="timeup-modal__score">答对 <strong id="timeupScore">0</strong> 题</p>
+            <button type="button" class="timeup-modal__btn" onclick="closeTimeUpModal()">知道了</button>
         </div>
     </div>
 
@@ -573,11 +685,26 @@
                 gameState.timer = null;
             }
             updateTimerToggleButton();
-            
+
             setTimeout(() => {
-                alert(`游戏结束！\n你答对了 ${gameState.score} 道题！`);
-                resetGame();
+                showTimeUpModal(gameState.score);
             }, 100);
+        }
+
+        function showTimeUpModal(score) {
+            const modal = document.getElementById('timeupModal');
+            document.getElementById('timeupScore').textContent = String(score);
+            modal.removeAttribute('hidden');
+            document.body.classList.add('timeup-modal-open');
+        }
+
+        function closeTimeUpModal() {
+            const modal = document.getElementById('timeupModal');
+            if (!modal.hasAttribute('hidden')) {
+                modal.setAttribute('hidden', '');
+                document.body.classList.remove('timeup-modal-open');
+                resetGame();
+            }
         }
 
         // 获取随机词语
