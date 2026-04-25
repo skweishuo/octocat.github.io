@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>你画我猜优化版</title>
     <style>
         * {
@@ -11,45 +11,76 @@
             box-sizing: border-box;
         }
 
+        button {
+            font-family: inherit;
+        }
+
+        html {
+            min-height: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+
         body {
             font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background:
+                radial-gradient(circle at top left, rgba(255, 197, 118, 0.35), transparent 30%),
+                radial-gradient(circle at top right, rgba(102, 126, 234, 0.26), transparent 34%),
+                linear-gradient(180deg, #fff8f3 0%, #f6f7ff 100%);
             min-height: 100vh;
+            min-height: 100dvh;
+            margin: 0;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+            justify-content: stretch;
+            align-items: stretch;
+            padding: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            touch-action: manipulation;
         }
 
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            margin: 0;
             background: rgba(255, 255, 255, 0.95);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            border-radius: 0;
+            box-shadow: none;
             backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
         }
 
         .header {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 55%, #fdcb6e 100%);
             color: white;
             text-align: center;
-            padding: 20px;
+            padding: calc(18px + env(safe-area-inset-top)) 20px 18px;
+            box-shadow: 0 10px 26px rgba(238, 90, 36, 0.2);
         }
 
         .header h1 {
-            font-size: 1.8rem;
+            font-size: clamp(1.45rem, 5vw, 2rem);
             font-weight: 600;
             margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.92;
         }
 
         .game-info {
             display: flex;
             justify-content: space-around;
             padding: 15px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+            background: rgba(255, 255, 255, 0.88);
+            border-bottom: 1px solid rgba(233, 236, 239, 0.8);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            backdrop-filter: blur(14px);
         }
 
         .info-item {
@@ -73,45 +104,58 @@
         }
 
         .main-content {
-            padding: 20px;
+            flex: 1;
+            padding: clamp(16px, 4vw, 26px);
         }
 
         .word-display {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
 
         .word {
-            font-size: 2.5rem;
+            min-height: 128px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(2rem, 10vw, 3.2rem);
             font-weight: bold;
-            color: #2d3436;
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            padding: 20px;
-            border: 2px dashed #ddd;
-            border-radius: 15px;
-            margin: 20px 0;
+            color: #5b5fd7;
+            background: rgba(255, 255, 255, 0.9);
+            padding: clamp(18px, 6vw, 30px);
+            border: 2px dashed rgba(102, 126, 234, 0.35);
+            border-radius: 22px;
+            margin: 18px 0;
+            box-shadow: 0 14px 34px rgba(102, 126, 234, 0.12);
+            text-shadow: 0 4px 16px rgba(102, 126, 234, 0.16);
+            word-break: break-word;
         }
 
         .controls {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
             margin-bottom: 20px;
-            flex-wrap: wrap;
+        }
+
+        .controls .btn-warning {
+            grid-column: 1 / -1;
         }
 
         .btn {
             flex: 1;
-            min-width: 120px;
-            padding: 15px 20px;
+            min-width: 0;
+            width: 100%;
+            padding: 15px 18px;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
+            min-height: 52px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn:active {
@@ -143,10 +187,12 @@
         }
 
         .settings {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.82);
+            padding: clamp(16px, 4vw, 22px);
+            border: 1px solid rgba(222, 226, 230, 0.8);
+            border-radius: 20px;
             margin-top: 20px;
+            box-shadow: 0 12px 30px rgba(45, 52, 54, 0.08);
         }
 
         .setting-group {
@@ -171,10 +217,11 @@
             min-width: 80px;
             padding: 10px;
             border: 2px solid #dee2e6;
-            border-radius: 8px;
+            border-radius: 12px;
             background: white;
             cursor: pointer;
             transition: all 0.3s ease;
+            min-height: 44px;
         }
 
         .time-btn.active {
@@ -232,25 +279,41 @@
             gap: 10px;
         }
 
-        .category-btn {
+        .category-btn,
+        .repeat-btn {
             padding: 10px;
             border: 2px solid #dee2e6;
-            border-radius: 8px;
+            border-radius: 12px;
             background: white;
             cursor: pointer;
             transition: all 0.3s ease;
             text-align: center;
+            min-height: 44px;
         }
 
-        .category-btn.active {
+        .category-btn.active,
+        .repeat-btn.active {
             border-color: #667eea;
             background: #667eea;
             color: white;
         }
 
+        .repeat-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+            gap: 10px;
+        }
+
+        .word-stats {
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: #6c757d;
+            line-height: 1.5;
+        }
+
         .start-screen {
             text-align: center;
-            padding: 40px 20px;
+            padding: clamp(36px, 10vh, 70px) 20px;
         }
 
         .start-btn {
@@ -269,6 +332,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .start-btn:hover {
@@ -280,19 +344,25 @@
             display: none;
         }
 
+        @media (min-width: 769px) {
+            .container {
+                max-width: 760px;
+                min-height: calc(100dvh - 40px);
+                margin: 20px auto;
+                border-radius: 28px;
+                overflow: hidden;
+                box-shadow: 0 24px 70px rgba(45, 52, 54, 0.14);
+            }
+        }
+
         @media (max-width: 768px) {
             .container {
-                margin: 10px;
-                border-radius: 15px;
+                margin: 0;
+                border-radius: 0;
             }
 
             .header h1 {
                 font-size: 1.5rem;
-            }
-
-            .word {
-                font-size: 2rem;
-                padding: 15px;
             }
 
             .btn {
@@ -309,16 +379,21 @@
         }
 
         @media (max-width: 480px) {
+            .header {
+                padding-bottom: 14px;
+            }
+
+            .game-info {
+                padding: 12px 10px;
+            }
+
             .controls {
-                flex-direction: column;
+                gap: 10px;
             }
 
-            .btn {
-                width: 100%;
-            }
-
-            .word {
-                font-size: 1.5rem;
+            .category-options {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
             }
 
             .start-btn {
@@ -326,6 +401,103 @@
                 height: 120px;
                 font-size: 1rem;
             }
+        }
+
+        /* 时间到 — 自定义弹层 */
+        .timeup-modal[hidden] {
+            display: none !important;
+        }
+
+        .timeup-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+
+        .timeup-modal__backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.48);
+            backdrop-filter: blur(8px);
+        }
+
+        .timeup-modal__card {
+            position: relative;
+            width: min(92vw, 360px);
+            padding: 26px 22px 22px;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+            text-align: center;
+            animation: timeup-pop 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @keyframes timeup-pop {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(12px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .timeup-modal__icon {
+            font-size: 2.75rem;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .timeup-modal__title {
+            margin: 0 0 8px;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #ee5a24;
+        }
+
+        .timeup-modal__desc {
+            margin: 0 0 14px;
+            font-size: 0.9rem;
+            color: #6c757d;
+            line-height: 1.5;
+        }
+
+        .timeup-modal__score {
+            margin: 0 0 22px;
+            font-size: 1.15rem;
+            color: #2d3436;
+        }
+
+        .timeup-modal__score strong {
+            color: #00b894;
+            font-size: 1.35rem;
+        }
+
+        .timeup-modal__btn {
+            width: 100%;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            box-shadow: 0 6px 20px rgba(238, 90, 36, 0.35);
+        }
+
+        .timeup-modal__btn:active {
+            transform: scale(0.98);
+        }
+
+        body.timeup-modal-open {
+            overflow: hidden;
+            touch-action: none;
         }
     </style>
 </head>
@@ -341,7 +513,7 @@
             <button class="start-btn" onclick="startGame()">开始游戏</button>
             <div style="margin-top: 30px; color: #6c757d;">
                 <p>⏱️ 120秒计时挑战</p>
-                <p>🎯 多种分类词库</p>
+                <p>🎯 大词库 + 近期不重复</p>
                 <p>🏆 实时答题统计</p>
             </div>
         </div>
@@ -399,19 +571,32 @@
                             <button class="category-btn" data-category="sport">体育</button>
                             <button class="category-btn" data-category="place">地名景点</button>
                         </div>
+                        <p class="word-stats" id="wordStats">当前词库加载中...</p>
                     </div>
 
                     <div class="setting-group">
-                        <label class="setting-label" for="noRepeatSelect">🔁 不重复冷却（按最近词数）</label>
-                        <select id="noRepeatSelect" onchange="setNoRepeatCount(this.value)" style="width: 100%; padding: 10px; border: 2px solid #dee2e6; border-radius: 8px; background: white;">
-                            <option value="10">最近 10 个词不重复</option>
-                            <option value="20" selected>最近 20 个词不重复（推荐）</option>
-                            <option value="30">最近 30 个词不重复</option>
-                            <option value="50">最近 50 个词不重复</option>
-                        </select>
+                        <label class="setting-label">🔁 重复控制</label>
+                        <div class="repeat-options">
+                            <button class="repeat-btn" data-repeat-limit="20">近20题</button>
+                            <button class="repeat-btn" data-repeat-limit="50">近50题</button>
+                            <button class="repeat-btn active" data-repeat-limit="100">近100题</button>
+                            <button class="repeat-btn" data-repeat-limit="9999">本轮尽量不重复</button>
+                        </div>
+                        <p class="word-stats">词库循环后，也会优先避开最近出现过的词。</p>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="timeupModal" class="timeup-modal" hidden role="dialog" aria-modal="true" aria-labelledby="timeupTitle">
+        <div class="timeup-modal__backdrop" onclick="closeTimeUpModal()"></div>
+        <div class="timeup-modal__card">
+            <div class="timeup-modal__icon" aria-hidden="true">⏱</div>
+            <h2 id="timeupTitle" class="timeup-modal__title">时间到</h2>
+            <p class="timeup-modal__desc">本轮挑战结束，看看你们答对了几题。</p>
+            <p class="timeup-modal__score">答对 <strong id="timeupScore">0</strong> 题</p>
+            <button type="button" class="timeup-modal__btn" onclick="closeTimeUpModal()">知道了</button>
         </div>
     </div>
 
@@ -421,68 +606,105 @@
             hot: [
                 "躺平", "内卷", "破防", "绝绝子", "yyds", "emo", "社死", "摆烂",
                 "凡尔赛", "打工人", "摸鱼", "干饭人", "真香", "奥力给", "冲鸭",
-                "显眼包", "拿捏", "CPU我", "栓Q", "上头", "无语子", "整活", "逆天",
-                "小作文", "开摆", "电子榨菜", "天花板", "双向奔赴", "有点东西"
+                "显眼包", "电子榨菜", "尊嘟假嘟", "泰裤辣", "多巴胺穿搭", "遥遥领先",
+                "特种兵旅游", "公主请上车", "搭子", "松弛感", "情绪价值", "泼天富贵",
+                "命运的齿轮", "我真的会谢", "栓Q", "退退退", "小镇做题家", "爷青回",
+                "社牛", "社恐", "早八人", "沉浸式", "氛围感", "废话文学", "蚌埠住了",
+                "芭比Q了", "夺笋", "破大防", "互联网嘴替", "人类高质量", "电子布洛芬"
             ],
             music: [
                 "青花瓷", "告白气球", "夜曲", "稻香", "七里香", "晴天", "双截棍",
                 "龙拳", "本草纲目", "小苹果", "最炫民族风", "忐忑", "我的滑板鞋",
-                "孤勇者", "起风了", "平凡之路", "后来", "十年", "演员", "红昭愿",
-                "听妈妈的话", "一路生花", "夜空中最亮的星", "小幸运", "爱你"
+                "孤勇者", "起风了", "后来", "演员", "光年之外", "泡沫", "平凡之路",
+                "成都", "追光者", "年少有为", "体面", "消愁", "海阔天空", "红日",
+                "爱你", "睫毛弯弯", "欧若拉", "江南", "曹操", "小酒窝", "突然好想你",
+                "知足", "倔强", "温柔", "月亮代表我的心", "甜蜜蜜", "朋友", "童话",
+                "老鼠爱大米", "爱情买卖", "荷塘月色", "左手右手", "大鱼", "如愿"
             ],
             movie: [
                 "复仇者联盟", "速度与激情", "变形金刚", "哈利波特", "泰坦尼克号",
                 "阿凡达", "盗梦空间", "肖申克的救赎", "霸王别姬", "哪吒之魔童降世",
-                "流浪地球", "长津湖", "让子弹飞", "唐人街探案", "我不是药神", "少年的你",
-                "疯狂动物城", "寻梦环游记", "你好，李焕英", "热辣滚烫"
+                "流浪地球", "满江红", "长津湖", "战狼", "让子弹飞", "唐人街探案",
+                "疯狂动物城", "功夫熊猫", "寻梦环游记", "千与千寻", "你的名字",
+                "摔跤吧爸爸", "楚门的世界", "星际穿越", "头号玩家", "蜘蛛侠",
+                "钢铁侠", "侏罗纪公园", "加勒比海盗", "指环王", "黑客帝国",
+                "美人鱼", "功夫", "少林足球", "喜剧之王", "无间道", "卧虎藏龙",
+                "大话西游", "飞驰人生", "热辣滚烫", "抓娃娃", "庆余年", "甄嬛传"
             ],
             idiom: [
                 "一心一意", "三心二意", "四面八方", "五湖四海", "六神无主",
                 "七上八下", "九牛一毛", "十全十美", "一心二用", "三顾茅庐",
-                "画蛇添足", "守株待兔", "掩耳盗铃", "滥竽充数", "刻舟求剑", "狐假虎威",
-                "亡羊补牢", "对牛弹琴", "画龙点睛", "井底之蛙"
+                "画蛇添足", "守株待兔", "亡羊补牢", "掩耳盗铃", "狐假虎威",
+                "刻舟求剑", "杯弓蛇影", "井底之蛙", "拔苗助长", "叶公好龙",
+                "对牛弹琴", "滥竽充数", "指鹿为马", "草木皆兵", "愚公移山",
+                "闻鸡起舞", "盲人摸象", "鹤立鸡群", "鸡飞狗跳", "龙飞凤舞",
+                "虎头蛇尾", "马到成功", "羊入虎口", "猴年马月", "一箭双雕",
+                "雪中送炭", "锦上添花", "水落石出", "心花怒放", "手舞足蹈"
             ],
             common: [
                 "电脑", "手机", "汽车", "飞机", "火车", "轮船", "自行车", "冰箱",
                 "洗衣机", "电视机", "空调", "微波炉", "电饭煲", "吸尘器",
-                "充电宝", "打印机", "投影仪", "电动车", "路由器", "耳机", "台灯",
-                "书包", "雨伞", "牙刷", "毛巾", "眼镜"
+                "书包", "雨伞", "钥匙", "眼镜", "口罩", "耳机", "充电宝", "遥控器",
+                "台灯", "闹钟", "牙刷", "拖鞋", "钱包", "行李箱", "电梯", "地铁",
+                "公交车", "红绿灯", "斑马线", "便利店", "快递", "外卖", "剪刀",
+                "胶带", "水杯", "镜子", "枕头", "被子", "沙发", "茶几", "窗帘",
+                "电风扇", "吹风机", "打印机", "路由器", "键盘", "鼠标"
             ],
             star: [
                 "周杰伦", "邓紫棋", "薛之谦", "沈腾", "贾玲", "杨幂", "赵丽颖",
                 "刘德华", "周星驰", "成龙", "吴京", "胡歌", "刘亦菲", "王一博",
-                "张艺兴", "易烊千玺", "鹿晗", "白敬亭", "迪丽热巴", "杨紫", "肖战",
-                "李现", "华晨宇", "张靓颖", "张学友", "梁朝伟"
+                "易烊千玺", "王俊凯", "王源", "肖战", "迪丽热巴", "杨紫", "张艺兴",
+                "黄渤", "徐峥", "黄磊", "何炅", "谢娜", "沈梦辰", "白敬亭",
+                "张若昀", "雷佳音", "马丽", "岳云鹏", "郭德纲", "于谦", "李现",
+                "朱一龙", "陈伟霆", "鹿晗", "关晓彤", "宋丹丹", "陈赫", "邓超",
+                "孙俪", "范丞丞", "白鹿", "虞书欣", "汪苏泷", "毛不易"
             ],
             anime: [
                 "原神", "王者荣耀", "塞尔达传说", "宝可梦", "火影忍者", "海贼王",
                 "进击的巨人", "名侦探柯南", "哆啦A梦", "海绵宝宝", "熊出没", "黑神话悟空",
-                "我的世界", "英雄联盟", "崩坏：星穹铁道", "第五人格", "鬼灭之刃", "咒术回战",
-                "灌篮高手", "龙珠", "间谍过家家", "银魂"
+                "英雄联盟", "和平精英", "我的世界", "植物大战僵尸", "蛋仔派对",
+                "第五人格", "阴阳师", "崩坏星穹铁道", "明日方舟", "开心消消乐",
+                "超级玛丽", "魂斗罗", "马里奥赛车", "动物森友会", "光遇",
+                "灌篮高手", "蜡笔小新", "犬夜叉", "龙珠", "数码宝贝", "葫芦娃",
+                "喜羊羊", "中华小当家", "鬼灭之刃", "咒术回战", "一拳超人",
+                "银魂", "排球少年", "间谍过家家", "猫和老鼠", "米奇妙妙屋"
             ],
             animal: [
                 "大熊猫", "长颈鹿", "考拉", "企鹅", "海豚", "孔雀", "仙人掌",
                 "向日葵", "银杏", "竹子", "含羞草", "猪笼草", "君子兰",
-                "梅花鹿", "树懒", "猫头鹰", "北极熊", "丹顶鹤", "蒲公英", "玫瑰",
-                "荷花", "松树", "樱花", "芦苇"
+                "老虎", "狮子", "斑马", "大象", "袋鼠", "树懒", "北极熊",
+                "松鼠", "刺猬", "兔子", "乌龟", "青蛙", "蝴蝶", "蜜蜂",
+                "蜗牛", "章鱼", "海星", "水母", "鲨鱼", "鲸鱼", "猫头鹰",
+                "鹦鹉", "火烈鸟", "梅花鹿", "骆驼", "玫瑰", "荷花", "樱花",
+                "菊花", "蒲公英", "芦荟", "绿萝", "发财树", "多肉植物"
             ],
             food: [
                 "火锅", "奶茶", "螺蛳粉", "煎饼果子", "肉夹馍", "小笼包", "兰州拉面",
                 "北京烤鸭", "臭豆腐", "冰粉", "蛋挞", "寿司", "披萨",
-                "麻辣烫", "烤冷面", "酸菜鱼", "炸鸡", "牛排", "沙拉", "糖醋里脊",
-                "扬州炒饭", "担担面", "椰子鸡", "杨枝甘露"
+                "炸鸡", "汉堡", "薯条", "麻辣烫", "烧烤", "串串香", "酸辣粉",
+                "热干面", "重庆小面", "肠粉", "云吞面", "沙县小吃", "锅包肉",
+                "糖醋里脊", "宫保鸡丁", "麻婆豆腐", "鱼香肉丝", "水煮鱼",
+                "佛跳墙", "粽子", "月饼", "汤圆", "饺子", "包子", "油条",
+                "豆浆", "榴莲", "西瓜", "草莓", "芒果", "冰淇淋", "巧克力"
             ],
             sport: [
                 "篮球", "足球", "乒乓球", "羽毛球", "游泳", "马拉松", "滑雪",
                 "滑板", "攀岩", "瑜伽", "拳击", "排球", "网球",
-                "高尔夫", "橄榄球", "棒球", "台球", "跳绳", "体操", "射箭",
-                "击剑", "短道速滑", "举重", "龙舟"
+                "跳绳", "跑步", "健身", "举重", "射箭", "击剑", "体操",
+                "跳水", "花样滑冰", "冰球", "短道速滑", "高尔夫", "保龄球",
+                "台球", "橄榄球", "棒球", "垒球", "冲浪", "帆船", "皮划艇",
+                "赛车", "自行车赛", "铁人三项", "广场舞", "太极拳", "踢毽子",
+                "拔河", "飞盘", "躲避球", "武术", "跆拳道", "空手道"
             ],
             place: [
                 "长城", "故宫", "西湖", "黄山", "九寨沟", "布达拉宫", "外滩",
                 "天安门", "兵马俑", "泰山", "桂林山水", "丽江古城", "大三巴",
-                "张家界", "鼓浪屿", "青海湖", "洱海", "乌镇", "婺源", "稻城亚丁",
-                "三亚", "喀纳斯", "平遥古城", "澳门塔"
+                "东方明珠", "迪士尼乐园", "鼓浪屿", "张家界", "峨眉山", "都江堰",
+                "武当山", "少林寺", "苏州园林", "乌镇", "周庄", "秦淮河",
+                "夫子庙", "宽窄巷子", "洪崖洞", "解放碑", "洱海", "玉龙雪山",
+                "三亚", "亚龙湾", "青岛栈桥", "哈尔滨冰雪大世界", "漠河",
+                "呼伦贝尔", "敦煌莫高窟", "月牙泉", "茶卡盐湖", "稻城亚丁",
+                "凤凰古城", "平遥古城", "澳门塔", "维多利亚港", "台北101"
             ]
         };
 
@@ -498,7 +720,7 @@
             timer: null,
             usedWords: [],
             recentWords: [],
-            noRepeatCount: 20
+            repeatHistoryLimit: 100
         };
 
         // 初始化分类按钮事件
@@ -507,9 +729,20 @@
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 gameState.selectedCategory = this.dataset.category;
+                updateWordStats();
                 if (gameState.isRunning) {
                     nextWord();
                 }
+            });
+        });
+
+        // 初始化重复控制按钮事件
+        document.querySelectorAll('.repeat-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.repeat-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                gameState.repeatHistoryLimit = Number(this.dataset.repeatLimit);
+                updateWordStats();
             });
         });
 
@@ -600,15 +833,29 @@
                 gameState.timer = null;
             }
             updateTimerToggleButton();
-            
+
             setTimeout(() => {
-                alert(`游戏结束！\n你答对了 ${gameState.score} 道题！`);
-                resetGame();
+                showTimeUpModal(gameState.score);
             }, 100);
         }
 
-        // 获取随机词语
-        function getRandomWord() {
+        function showTimeUpModal(score) {
+            const modal = document.getElementById('timeupModal');
+            document.getElementById('timeupScore').textContent = String(score);
+            modal.removeAttribute('hidden');
+            document.body.classList.add('timeup-modal-open');
+        }
+
+        function closeTimeUpModal() {
+            const modal = document.getElementById('timeupModal');
+            if (!modal.hasAttribute('hidden')) {
+                modal.setAttribute('hidden', '');
+                document.body.classList.remove('timeup-modal-open');
+                resetGame();
+            }
+        }
+
+        function getCurrentWordPool() {
             let words = [];
             
             if (gameState.selectedCategory === "all") {
@@ -618,32 +865,57 @@
             } else {
                 words = wordLibrary[gameState.selectedCategory] || [];
             }
+
+            return [...new Set(words)];
+        }
+
+        function formatRepeatLimit(limit) {
+            return limit >= 9999 ? "本轮尽量不重复" : `近${limit}题不重复`;
+        }
+
+        function updateWordStats() {
+            const stats = document.getElementById('wordStats');
+            if (!stats) return;
+
+            const words = getCurrentWordPool();
+            const appearedCount = words.filter(word => gameState.usedWords.includes(word)).length;
+            stats.textContent = `当前分类共 ${words.length} 个词，已出现 ${appearedCount} 个；${formatRepeatLimit(gameState.repeatHistoryLimit)}。`;
+        }
+
+        // 获取随机词语
+        function getRandomWord() {
+            const words = getCurrentWordPool();
             
             if (words.length === 0) {
                 return "暂无词语";
             }
+            
+            const repeatLimit = Math.min(gameState.repeatHistoryLimit, Math.max(words.length - 1, 0));
+            const recentBlockedWords = new Set(repeatLimit > 0 ? gameState.recentWords.slice(-repeatLimit) : []);
+            let availableWords = words.filter(word => {
+                return !gameState.usedWords.includes(word) && !recentBlockedWords.has(word);
+            });
+            
+            if (availableWords.length === 0) {
+                // 词库跑完后重新循环，但仍尽量避开最近出现的词，减少连续撞词。
+                availableWords = words.filter(word => !recentBlockedWords.has(word));
+                gameState.usedWords = [];
+            }
 
-            // 按最近 N 个词做冷却，避免短时间内重复
-            const availableWords = words.filter(word => !gameState.recentWords.includes(word));
-            const pool = availableWords.length > 0 ? availableWords : words;
-            const randomWord = pool[Math.floor(Math.random() * pool.length)];
-
+            if (availableWords.length === 0) {
+                availableWords = words;
+            }
+            
+            const randomWord = availableWords[Math.floor(Math.random() * availableWords.length)];
             gameState.usedWords.push(randomWord);
             gameState.recentWords.push(randomWord);
-            const cap = Math.max(1, Number(gameState.noRepeatCount) || 1);
-            if (gameState.recentWords.length > cap) {
-                gameState.recentWords.shift();
-            }
-            return randomWord;
-        }
 
-        function setNoRepeatCount(count) {
-            const parsed = Number(count);
-            gameState.noRepeatCount = Number.isFinite(parsed) ? parsed : 20;
-            const cap = Math.max(1, gameState.noRepeatCount);
-            if (gameState.recentWords.length > cap) {
-                gameState.recentWords = gameState.recentWords.slice(-cap);
+            if (gameState.recentWords.length > 300) {
+                gameState.recentWords = gameState.recentWords.slice(-300);
             }
+
+            updateWordStats();
+            return randomWord;
         }
 
         // 切换到下一个词语
@@ -699,11 +971,13 @@
             
             updateDisplay();
             updateTimerToggleButton();
+            updateWordStats();
         }
 
         // 页面加载完成后的初始化
         document.addEventListener('DOMContentLoaded', function() {
             updateDisplay();
+            updateWordStats();
         });
     </script>
 </body>
