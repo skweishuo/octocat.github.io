@@ -340,6 +340,47 @@
             box-shadow: 0 25px 50px rgba(255, 107, 107, 0.5);
         }
 
+        .group-select {
+            width: min(100%, 420px);
+            margin: 0 auto 18px;
+            padding: 18px;
+            border: 1px solid rgba(222, 226, 230, 0.85);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.86);
+            box-shadow: 0 10px 26px rgba(45, 52, 54, 0.08);
+        }
+
+        .group-select-title {
+            margin-bottom: 12px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .group-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .group-btn {
+            min-height: 46px;
+            border: 2px solid #dee2e6;
+            border-radius: 12px;
+            background: #fff;
+            color: #495057;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .group-btn.active {
+            border-color: #ff6b6b;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: #fff;
+            box-shadow: 0 6px 18px rgba(238, 90, 36, 0.28);
+        }
+
         .game-screen {
             display: none;
         }
@@ -400,6 +441,10 @@
                 width: 120px;
                 height: 120px;
                 font-size: 1rem;
+            }
+
+            .group-options {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -510,10 +555,19 @@
 
         <div class="start-screen" id="startScreen">
             <h2 style="margin-bottom: 30px; color: #6c757d;">准备好了吗？</h2>
+            <div class="group-select" aria-label="选择小组">
+                <div class="group-select-title">先选择小组</div>
+                <div class="group-options">
+                    <button type="button" class="group-btn active" data-group="1">1组</button>
+                    <button type="button" class="group-btn" data-group="2">2组</button>
+                    <button type="button" class="group-btn" data-group="3">3组</button>
+                    <button type="button" class="group-btn" data-group="4">4组</button>
+                </div>
+            </div>
             <button class="start-btn" onclick="startGame()">开始游戏</button>
             <div style="margin-top: 30px; color: #6c757d;">
                 <p>⏱️ 120秒计时挑战</p>
-                <p>🎯 大词库 + 近期不重复</p>
+                <p>🎯 4组每日题目不重复</p>
                 <p>🏆 实时答题统计</p>
             </div>
         </div>
@@ -527,6 +581,10 @@
                 <div class="info-item">
                     <div class="info-label">答对题数</div>
                     <div class="info-value" id="score">0</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">当前小组</div>
+                    <div class="info-value" id="currentGroup">1组</div>
                 </div>
             </div>
 
@@ -709,12 +767,15 @@
         };
 
         // 全局变量
+        const DAILY_WORD_STORAGE_KEY = 'drawGuessDailyWordsV1';
+
         let gameState = {
             isRunning: false,
             timerTicking: false,
             timeLeft: 120,
             score: 0,
             currentWord: "",
+            selectedGroup: "1",
             selectedCategory: "all",
             selectedTime: 120,
             timer: null,
@@ -722,6 +783,77 @@
             recentWords: [],
             repeatHistoryLimit: 100
         };
+
+        function getTodayKey() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function getDailyWordRecord() {
+            const today = getTodayKey();
+            const fallback = { date: today, usedWords: [], groups: {} };
+
+            try {
+                const rawRecord = localStorage.getItem(DAILY_WORD_STORAGE_KEY);
+                if (!rawRecord) return fallback;
+
+                const record = JSON.parse(rawRecord);
+                if (record.date !== today) return fallback;
+
+                return {
+                    date: today,
+                    usedWords: Array.isArray(record.usedWords) ? record.usedWords : [],
+                    groups: record.groups && typeof record.groups === 'object' ? record.groups : {}
+                };
+            } catch (error) {
+                return fallback;
+            }
+        }
+
+        function saveDailyWordRecord(record) {
+            try {
+                localStorage.setItem(DAILY_WORD_STORAGE_KEY, JSON.stringify(record));
+            } catch (error) {
+                // localStorage 不可用时仍可继续本轮游戏，只是刷新后无法保留每日去重。
+            }
+        }
+
+        function rememberDailyWord(word) {
+            if (!word || word === "暂无词语" || word === "今日题目已抽完") return;
+
+            const record = getDailyWordRecord();
+            if (!record.usedWords.includes(word)) {
+                record.usedWords.push(word);
+            }
+
+            const groupKey = `group${gameState.selectedGroup}`;
+            if (!Array.isArray(record.groups[groupKey])) {
+                record.groups[groupKey] = [];
+            }
+            if (!record.groups[groupKey].includes(word)) {
+                record.groups[groupKey].push(word);
+            }
+
+            saveDailyWordRecord(record);
+        }
+
+        function getTodayUsedWords() {
+            return getDailyWordRecord().usedWords;
+        }
+
+        // 初始化小组选择事件
+        document.querySelectorAll('.group-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.group-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                gameState.selectedGroup = this.dataset.group;
+                updateDisplay();
+                updateWordStats();
+            });
+        });
 
         // 初始化分类按钮事件
         document.querySelectorAll('.category-btn').forEach(btn => {
@@ -878,8 +1010,11 @@
             if (!stats) return;
 
             const words = getCurrentWordPool();
+            const todayUsedWords = getTodayUsedWords();
             const appearedCount = words.filter(word => gameState.usedWords.includes(word)).length;
-            stats.textContent = `当前分类共 ${words.length} 个词，已出现 ${appearedCount} 个；${formatRepeatLimit(gameState.repeatHistoryLimit)}。`;
+            const todayUsedCount = words.filter(word => todayUsedWords.includes(word)).length;
+            const remainingCount = Math.max(words.length - todayUsedCount, 0);
+            stats.textContent = `当前分类共 ${words.length} 个词，本轮已出现 ${appearedCount} 个；今日四组已用 ${todayUsedCount} 个，剩余 ${remainingCount} 个；${formatRepeatLimit(gameState.repeatHistoryLimit)}。`;
         }
 
         // 获取随机词语
@@ -892,23 +1027,24 @@
             
             const repeatLimit = Math.min(gameState.repeatHistoryLimit, Math.max(words.length - 1, 0));
             const recentBlockedWords = new Set(repeatLimit > 0 ? gameState.recentWords.slice(-repeatLimit) : []);
+            const todayUsedWords = new Set(getTodayUsedWords());
             let availableWords = words.filter(word => {
-                return !gameState.usedWords.includes(word) && !recentBlockedWords.has(word);
+                return !todayUsedWords.has(word) && !gameState.usedWords.includes(word) && !recentBlockedWords.has(word);
             });
             
             if (availableWords.length === 0) {
-                // 词库跑完后重新循环，但仍尽量避开最近出现的词，减少连续撞词。
-                availableWords = words.filter(word => !recentBlockedWords.has(word));
-                gameState.usedWords = [];
+                availableWords = words.filter(word => !todayUsedWords.has(word));
             }
 
             if (availableWords.length === 0) {
-                availableWords = words;
+                updateWordStats();
+                return "今日题目已抽完";
             }
             
             const randomWord = availableWords[Math.floor(Math.random() * availableWords.length)];
             gameState.usedWords.push(randomWord);
             gameState.recentWords.push(randomWord);
+            rememberDailyWord(randomWord);
 
             if (gameState.recentWords.length > 300) {
                 gameState.recentWords = gameState.recentWords.slice(-300);
@@ -920,7 +1056,7 @@
 
         // 切换到下一个词语
         function nextWord(isCorrect = false) {
-            if (isCorrect && gameState.isRunning) {
+            if (isCorrect && gameState.isRunning && gameState.currentWord !== "今日题目已抽完") {
                 gameState.score++;
             }
             
@@ -935,6 +1071,7 @@
             document.getElementById('timer').textContent = `${gameState.timeLeft}s`;
             document.getElementById('score').textContent = gameState.score;
             document.getElementById('currentWord').textContent = gameState.currentWord;
+            document.getElementById('currentGroup').textContent = `${gameState.selectedGroup}组`;
             updateTimerToggleButton();
             
             // 时间警告效果
